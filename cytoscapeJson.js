@@ -29,7 +29,7 @@ Promise.map(uriList, function(data) {
   return getCytoscapeJson(data).then(q => fs.writeFileSync(filename, JSON.stringify(q)));
 }, {concurrency : 8 });*/
 
-var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-6804754').then(data => fs.writeFileSync('tester3', JSON.stringify(data)));
+var x = getCytoscapeJson('http://pathwaycommons.org/pc2/Pathway_86dfeefab680cec9bb206120fde3f123').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
 
 
 

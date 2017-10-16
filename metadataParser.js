@@ -52,7 +52,7 @@ function searchOne(subtree, key, name) {
 //Requires a valid subtree
 function searchMultiple(subtree, key, name) {
   var temp = searchTree(subtree, key, false);
-  if (temp) return ['name', temp];
+  if (temp) return [name, temp];
   else return null;
 }
 
@@ -124,7 +124,7 @@ function parse(subTree) {
       result.splice(i, 1);
     }
   }
-  
+
   return result; 
 }
 

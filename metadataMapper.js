@@ -106,16 +106,16 @@ function buildBioPaxSubtree(biopaxElement, biopaxFile, visited) {
     //Recurse on the referenced element
     if ((resource && resource.charAt(0) === '#') || entityRef) {
       //Get reference id
-      var refId = resource.substring(1);
+      var refId = resource.charAt(0) === '#' ?  resource.substring(1) : resource;
       var referencedItem = GetElementsByAttributeWithoutTag('rdf:ID', refId, biopaxFile)[0];
 
       //Check if next node was visited
       var nodeVisited = (visitCopy.indexOf(refId) <= -1);
 
       //Restore original id for  entity references
-      if (entityRef) {
+      if (entityRef && resource.charAt(0) !== '#') {
         //Store ID if current element is a entity reference
-        refId = children[i].getAttribute('rdf:resource');
+        //refId = children[i].getAttribute('rdf:resource');
         tag += '_' + refId;
         referencedItem = GetElementsByAttributeWithoutTag('rdf:about', refId, biopaxFile)[0];
       }
