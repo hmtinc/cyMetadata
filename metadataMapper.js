@@ -20,6 +20,7 @@
 
 const fs = require('fs');
 const convert = require('sbgnml-to-cytoscape');
+const metadataParser = require('./metadataParser.js');
 var ProgressBar = require('ascii-progress');
 var DOMParser = require('xmldom').DOMParser;
 
@@ -242,8 +243,16 @@ function processBioPax(data, nodes) {
     //Get metadata for current node
     var metadata = getBioPaxSubtree(id, bioPaxTree);
 
+    //Parse metadata
+    try {
+    var parsedMetadata = metadataParser(metadata);
+    }
+    catch (e) {console.log(e);}
+
     //Add data to nodes
     nodes[i].data.metadata = metadata;
+    nodes[i].data.parsedMetadata = parsedMetadata;
+
   }
 
   //Return nodes
