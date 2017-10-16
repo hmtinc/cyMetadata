@@ -17,12 +17,31 @@
     @version 1.1 2017/10/10
 **/
 
-//Returns all values mapped to a key in a given subtree 
-//Requires subtree to be valid 
-//Note : null is returned if no match is found
-function searchTree(subtree, key){
-  
+//Returns all values mapped to a key in a given subtree
+//Requires subtree to be valid
+//Note : A empty array is returned if no match is found
+function searchTree(subtree, key) {
+  var result = []
+
+  //Loop through all level nodes
+  for (var i = 0; i < subtree.length; i++) {
+    //Recurse on subtree if one exists
+    if (subtree[i][1] instanceof Array) {
+      result.push(searchTree(subtree[i][1], key));
+    }
+    //Push current value if it matches
+    else if (subtree[i][0] == key) {
+      result.push(subtree[i][1]);
+    }
+  }
+
+  return result; 
 }
 
-function parse(subTree){
+
+
+//Returns a human readable array of metadata 
+//Requies subtree to be valid 
+//Note : null is returned if nothing can be parsed
+function parse(subTree) {
 }
