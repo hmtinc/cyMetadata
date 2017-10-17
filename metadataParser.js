@@ -69,6 +69,7 @@ function searchMultiple(subtree, key, name) {
 //Returns an array, a string, or null
 //Requires a valid subtree
 function searchForNode(subtree, key) {
+  if (!(subtree)) return null;
   for (var i = 0; i < subtree.length; i++) {
     if (subtree[i][0].indexOf(key) !== -1) return subtree[i][1];
   }
@@ -78,16 +79,17 @@ function searchForNode(subtree, key) {
 //Search for first instance of a key in a subtree
 //Returns a string or array
 //Requires valid subtree
-function searchForFirst(subTree, key){
+function searchForFirst(subTree, key) {
+  if (!(subTree)) return null;
 
   //Loop through all nodes
-  for(var i = 0; i < subTree.length; i++){
-    if(subTree[i][0].indexOf(key) > -1){
+  for (var i = 0; i < subTree.length; i++) {
+    if (subTree[i][0].indexOf(key) > -1) {
       return subTree[i][1];
     }
     else if (subTree[i][1] instanceof Array) {
       var result = searchForFirst(subTree[i][1], key);
-      if(result) return result;
+      if (result) return result;
     }
   }
 
@@ -95,13 +97,44 @@ function searchForFirst(subTree, key){
   return null;
 }
 
+//Search for a subnode based on an exact match
+//Returns an array, a string, or null
+//Requires a valid subtree
+function searchForExactNode(subtree, key) {
+  if (!(subtree)) return null;
+  for (var i = 0; i < subtree.length; i++) {
+    if (subtree[i][0] === key) return subtree[i][1];
+  }
+  return null;
+}
+
+//Parse database ids
+//Requires a subtree consisting of database ID objects
+//Note : null is returnd if no ID is found. 
+function parseDatabaseIDs(subTree) {
+  var result = [];
+
+  //Loop through all different database ids
+  for (var i = 0; i < subTree.length; i++) {
+    //Get values
+    //console.log(subTree[i]);
+    var id = searchForExactNode(subTree[i], 'bp:id');
+    var source = searchForExactNode(subTree[i], 'bp:db');
+
+    //Push to result
+    if (id && source) result.push([source, id]);
+  }
+
+  return result;
+}
 
 //Returns a human readable array of metadata
-//Requies subtree to be valid
+//Requires subtree to be valid
 //Note : null is returned if nothing can be parsed
 function parse(subTree) {
   var result = [];
   var temp = [];
+  var databaseIDs = [];
 
   //Stop id subtree is invalid
   if (!(subTree)) return null;
@@ -117,7 +150,8 @@ function parse(subTree) {
     result.push(searchMultiple(eRef, 'bp:name', 'Names'));
 
     //Get database ids
-    result.push(searchMultiple(eRef, 'bp:xref', 'Database IDs'));
+    databaseIDs = searchMultiple(eRef, 'bp:xref', 'Database IDs')
+    if(databaseIDs) databaseIDs = databaseIDs[1];
   }
 
   //Get data source
@@ -131,7 +165,7 @@ function parse(subTree) {
     result.push(searchMultiple(subTree, 'bp:name', 'Names'));
 
     //Get Biopax database id's
-    result.push(["Database IDs", [searchForNode(subTree, 'bp:xref')]]);
+    databaseIDs = [searchForNode(subTree, 'bp:xref')];
   }
 
   //Get cellular location
@@ -139,7 +173,7 @@ function parse(subTree) {
   if (location) {
     //var term = searchForNode(location, 'bp:term');
     var term = searchForFirst(location, 'bp:term');
-    if(term) result.push('Cellular Location : ' + term);
+    if (term) result.push('Cellular Location : ' + term);
   }
 
   //Get all comments
@@ -147,7 +181,11 @@ function parse(subTree) {
 
   //Get display name 
   temp = searchForNode(subTree, 'bp:displayName');
-  if(temp) result.push('Display Name : ' + temp);
+  if (temp) result.push('Display Name : ' + temp);
+
+  //Parse database id objects
+  if (databaseIDs) databaseIDs = parseDatabaseIDs(databaseIDs);
+  if (databaseIDs) result.push(['Database IDs', databaseIDs]);
 
   //Remove all invalid values
   for (var i = 0; i < result.length; i++) {
@@ -155,6 +193,8 @@ function parse(subTree) {
       result.splice(i, 1);
     }
   }
+
+  if(result )
 
   return result;
 }
