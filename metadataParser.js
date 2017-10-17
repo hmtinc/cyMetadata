@@ -60,7 +60,7 @@ function searchOne(subtree, key, name) {
 //Requires a valid subtree
 function searchMultiple(subtree, key, name) {
   var temp = searchTree(subtree, key, false);
-  if (temp) return [name, temp];
+  if (temp && temp.length > 0) return [name, temp];
   else return null;
 }
 
@@ -123,7 +123,7 @@ function parse(subTree) {
   //Get data source
   var source = searchForNode(subTree, 'bp:dataSource');
   if (typeof source === 'string') result.push("Data Source : " + source);
-  else if (source) result.push("Data Source : " + source[0][1]);
+  else if (source) result.push("Data Source : " + searchForNode(source, ''));
 
   //Get values if entity reference was not found
   if (!eRef) {
@@ -144,6 +144,10 @@ function parse(subTree) {
 
   //Get all comments
   result.push(searchMultiple(subTree, 'bp:comment', 'Comments'));
+
+  //Get display name 
+  temp = searchForNode(subTree, 'bp:displayName');
+  if(temp) result.push('Display Name : ' + temp);
 
   //Remove all invalid values
   for (var i = 0; i < result.length; i++) {
