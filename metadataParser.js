@@ -14,7 +14,7 @@
     Note : Script may take time to parse metadata
 
     @author Harsh Mistry
-    @version 1.1 2017/10/10
+    @version 1.1 2017/10/17
 **/
 
 //Returns all values mapped to a key in a given subtree
@@ -37,11 +37,19 @@ function searchTree(subtree, key, recurse = true) {
     }
   }
 
+  //Remove all invalid values
+  for (var i = 0; i < result.length; i++) {
+    if (!(result[i])) {
+      result.splice(i, 1);
+    }
+  }
+
   return result;
 }
 
 //Search for just one entry
 //Requires a valid subtree
+//Note : Recurse will search entire subtree for the node
 function searchOne(subtree, key, name) {
   var temp = searchTree(subtree, key, false);
   if (temp.length > 0) return name + temp[0];
@@ -61,9 +69,29 @@ function searchMultiple(subtree, key, name) {
 //Returns an array, a string, or null
 //Requires a valid subtree
 function searchForNode(subtree, key) {
-  for (var i = 0; i < subtree.length; i++){
+  for (var i = 0; i < subtree.length; i++) {
     if (subtree[i][0].indexOf(key) !== -1) return subtree[i][1];
   }
+  return null;
+}
+
+//Search for first instance of a key in a subtree
+//Returns a string or array
+//Requires valid subtree
+function searchForFirst(subTree, key){
+
+  //Loop through all nodes
+  for(var i = 0; i < subTree.length; i++){
+    if(subTree[i][0].indexOf(key) > -1){
+      return subTree[i][1];
+    }
+    else if (subTree[i][1] instanceof Array) {
+      var result = searchForFirst(subTree[i][1], key);
+      if(result) return result;
+    }
+  }
+
+  //No Match
   return null;
 }
 
@@ -81,7 +109,6 @@ function parse(subTree) {
   //Get the entity reference object
   var eRef = searchForNode(subTree, 'bp:entityReference');
 
-
   if (eRef) {
     //Get the standard name
     result.push(searchOne(eRef, 'bp:standardName', 'Standard Name : '));
@@ -95,37 +122,37 @@ function parse(subTree) {
 
   //Get data source
   var source = searchForNode(subTree, 'bp:dataSource');
-  if (typeof source === 'string' ) result.push("Data Source : " + source);
-  else if(source) result.push("Data Source : " + source[0][1]);
+  if (typeof source === 'string') result.push("Data Source : " + source);
+  else if (source) result.push("Data Source : " + source[0][1]);
 
   //Get values if entity reference was not found
-  if (!eRef){
+  if (!eRef) {
     //Get BioPax Names
     result.push(searchMultiple(subTree, 'bp:name', 'Names'));
 
     //Get Biopax database id's
-    result.push(["Database IDs", searchForNode(subTree, 'bp:xref')]);
+    result.push(["Database IDs", [searchForNode(subTree, 'bp:xref')]]);
   }
-
 
   //Get cellular location
   var location = searchForNode(subTree, 'bp:cellularLocation');
-  if(location) {
-    var term = searchForNode(location, 'bp:term');
-    result.push('Cellular Location : ' + term); 
+  if (location) {
+    //var term = searchForNode(location, 'bp:term');
+    var term = searchForFirst(location, 'bp:term');
+    if(term) result.push('Cellular Location : ' + term);
   }
 
   //Get all comments
-  result.push(searchMultiple(subTree, 'bp:comment', 'Comments')); 
+  result.push(searchMultiple(subTree, 'bp:comment', 'Comments'));
 
   //Remove all invalid values
-  for (var i = 0; i < result.length; i++){
-    if(!(result[i])){
+  for (var i = 0; i < result.length; i++) {
+    if (!(result[i])) {
       result.splice(i, 1);
     }
   }
 
-  return result; 
+  return result;
 }
 
 //Export main function

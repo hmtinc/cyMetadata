@@ -12,7 +12,7 @@
 
     Note : Script may take time to download from pc2, due to uptime issues
 
-    @author Harsh Mistry
+    @author Harsh Mistry 
     @version 1.1 2017/10/10
 **/
 
@@ -27,10 +27,11 @@ const Promise = require('bluebird');
 Promise.map(uriList, function(data) {
   var filename = "genFiles/" + encodeURIComponent(data) + ".jsonplus"
   return getCytoscapeJson(data).then(q => fs.writeFileSync(filename, JSON.stringify(q)));
-}, {concurrency : 8 });*/
-
-var x = getCytoscapeJson('http://pathwaycommons.org/pc2/Pathway_86dfeefab680cec9bb206120fde3f123').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
-
+}, {concurrency : 8 });
+*/
+//
+//http://www.pathwaycommons.org/pathways/#/view?uri=http%3A%2F%2Fidentifiers.org%2Freactome%2FR-HSA-6804754
+var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-6804754').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
 
 
 //Get pathway name, description, and datasource
@@ -86,7 +87,7 @@ function getCytoscapeJson(uri) {
   var pathwayMetadata;
 
   //Start Spinner
-  const spinner = new Multispinner({'main' : uri });
+  const spinner = new Multispinner({ 'main': uri });
   //console.log('\x1b[36m%s\x1b[0m', 'Processing ' + uri);
 
   //Start Generation
@@ -97,11 +98,12 @@ function getCytoscapeJson(uri) {
       spinner.success('main');
       return data;
     })
-  }).catch(function(e){
+  }).catch(function (e) {
+    console.log(e);
     spinner.error('main');
   })
 }
 
 module.exports = {
-  getCytoscapeJson : getCytoscapeJson
+  getCytoscapeJson: getCytoscapeJson
 };
