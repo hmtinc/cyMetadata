@@ -23,21 +23,11 @@ var Multispinner = require('multispinner')
 const uriList = require('./file.js');
 const Promise = require('bluebird');
 
-/*
-Promise.map(uriList, function(data) {
-  var filename = "genFiles/" + encodeURIComponent(data) + ".jsonplus"
-  return getCytoscapeJson(data).then(q => fs.writeFileSync(filename, JSON.stringify(q)));
-}, {concurrency : 8 });
-*/
-//
-//http://www.pathwaycommons.org/pathways/#/view?uri=http%3A%2F%2Fidentifiers.org%2Freactome%2FR-HSA-6804754
-var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-6804754').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
-
 
 //Get pathway name, description, and datasource
 //Requires a valid pathway uri
 function getPathwayLevelMetadata(uri) {
-  var title, dataSource, comments;
+  var title, dataSource, comments, organism;
 
   //Get title
   return fileDownloader.traversePC2(uri, 'Named/displayName').then(function (data) {
@@ -51,12 +41,18 @@ function getPathwayLevelMetadata(uri) {
       return fileDownloader.traversePC2(uri, 'Entity/comment').then(function (data) {
         comments = data.traverseEntry[0].value;
 
-        //Return pathway metadata
-        return {
-          comments: comments,
-          dataSource: dataSource,
-          title: title
-        };
+        return fileDownloader.traversePC2(uri, 'Entity/organism/displayName').then(function (data) {
+          organism = data.traverseEntry[0].value;
+
+          //Return pathway metadata
+          return {
+            comments: comments,
+            dataSource: dataSource,
+            title: title,
+            organism : organism
+          };
+
+        })
       });
     });
   });
