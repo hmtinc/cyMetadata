@@ -46,9 +46,9 @@ function parse(subTree) {
 
   //Validate subtree
   if(!(subTree)) return null; 
-  
+
   //Make a copy of subtree
-  var subTreeCopy = subTree.splice();
+  var subTreeCopy = subTree.slice();
 
   //Get All References
   for (var i = 0; i < references.length; i++){
@@ -60,7 +60,7 @@ function parse(subTree) {
 
   //Parse Database ID's
   var parsedIDs = parseDatabaseIDs(references);
-  subTreeCopy.push(['Database IDs', parsedIDs]); 
+  if(parsedIDs) subTreeCopy.push(['Database IDs', parsedIDs]);
 
   return subTreeCopy;
 }

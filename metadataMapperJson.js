@@ -219,9 +219,8 @@ function processBioPax(data, nodes) {
   
     //Parse metadata
     try {
-      var parsedMetadata = metadataParser(metadata);
-
       //Add data to nodes
+      var parsedMetadata = metadataParser(metadata);
       nodes[i].data.metadata = metadata;
       nodes[i].data.parsedMetadata = parsedMetadata;
     }
