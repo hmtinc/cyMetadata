@@ -1,8 +1,8 @@
 /**
     Pathway Commons Central Data Cache
 
-    Metadata Mapper
-    metadataMapper.js
+    Metadata Mapper for XML Files
+    metadataMapperXML.js
 
     Purpose : Maps Metadata to SBGN nodes and returns an enhanced cytoscape json
 
@@ -18,7 +18,7 @@
 
 const fs = require('fs');
 const convert = require('sbgnml-to-cytoscape');
-const metadataParser = require('./metadataParser.js');
+const metadataParser = require('./metadataParserXML.js');
 var ProgressBar = require('ascii-progress');
 var DOMParser = require('xmldom').DOMParser;
 
