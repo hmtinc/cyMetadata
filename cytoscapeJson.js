@@ -18,11 +18,13 @@
 
 const fs = require('fs');
 const fileDownloader = require('./fileDownloader.js');
-const metadataMapper = require('./metadataMapper.js');
+const metadataMapperJson= require('./metadataMapperJson.js'); 
 var Multispinner = require('multispinner')
 const uriList = require('./file.js');
 const Promise = require('bluebird');
-
+//http://identifiers.org/reactome/R-HSA-6804754
+//http://identifiers.org/kegg.pathway/hsa00260
+var x = getCytoscapeJson('http://identifiers.org/kegg.pathway/hsa00260').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
 
 //Get pathway name, description, and datasource
 //Requires a valid pathway uri
@@ -68,11 +70,12 @@ function getMetadataJson(uri) {
     sbgn = data;
 
     //Get BioPax XML
-    return fileDownloader.getPC2(uri, 'biopax').then(function (data) {
+    return fileDownloader.getPC2(uri, 'jsonld').then(function (data) {
       biopax = data;
 
       //Map metadata
-      return metadataMapper(biopax, sbgn);
+      //return metadataMapper(biopax, sbgn);
+      return metadataMapperJson(biopax, sbgn);
     })
   });
 }
@@ -84,7 +87,6 @@ function getCytoscapeJson(uri) {
 
   //Start Spinner
   const spinner = new Multispinner({ 'main': uri });
-  //console.log('\x1b[36m%s\x1b[0m', 'Processing ' + uri);
 
   //Start Generation
   return getPathwayLevelMetadata(uri).then(function (data) {
