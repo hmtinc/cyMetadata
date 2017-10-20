@@ -20,13 +20,12 @@ const fs = require('fs');
 const fileDownloader = require('./fileDownloader.js');
 const metadataMapperJson= require('./metadataMapperJson.js'); 
 var Multispinner = require('multispinner');
-const uriList = require('./file.js');
 const Promise = require('bluebird');
 
 
 //http://identifiers.org/reactome/R-HSA-6804754
 //http://identifiers.org/kegg.pathway/hsa00260
-var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-70171').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
+//var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-70171').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
 
 
 
@@ -47,6 +46,7 @@ function getPathwayLevelMetadata(uri) {
       return fileDownloader.traversePC2(uri, 'Entity/comment').then(function (data) {
         comments = data.traverseEntry[0].value;
 
+        //Get organism name
         return fileDownloader.traversePC2(uri, 'Entity/organism/displayName').then(function (data) {
           organism = data.traverseEntry[0].value;
 
@@ -107,5 +107,6 @@ function getCytoscapeJson(uri) {
 }
 
 module.exports = {
-  getCytoscapeJson: getCytoscapeJson
+  getCytoscapeJson: getCytoscapeJson,
+  getPathwayLevelMetadata : getPathwayLevelMetadata
 };
