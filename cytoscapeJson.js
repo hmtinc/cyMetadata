@@ -25,7 +25,7 @@ const Promise = require('bluebird');
 
 //http://identifiers.org/reactome/R-HSA-6804754
 //http://identifiers.org/kegg.pathway/hsa00260
-//var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-70171').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
+var x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-70171').then(data => fs.writeFileSync('tester4', JSON.stringify(data)));
 
 //Get pathway name, description, and datasource
 //Requires a valid pathway uri
@@ -96,6 +96,7 @@ function getCytoscapeJson(uri, parseType = 'jsonld') {
     pathwayMetadata = data;
     return getMetadataJson(uri, parseType).then(function (data) {
       data.pathwayMetadata = pathwayMetadata;
+      data.parseType = parseType;
       spinner.success('main');
       return data;
     })
