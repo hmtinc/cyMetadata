@@ -32,10 +32,7 @@ module.exports = function (biopax, sbgn) {
 
   //Get mapped node list
   var nodes = cyGraph.nodes;
-  cyGraph.nodes = processBioPax(biopax, nodes);
-
-  //Return Enhanced JSON
-  return cyGraph;
+  return processBioPax(biopax, nodes).then(data => {cyGraph.nodes = data; return cyGraph});
 }
 
 //Get data from pc2 via traverse
@@ -47,21 +44,17 @@ function getData(id, path) {
     id = 'http://pathwaycommons.org/pc2/' + id;
   }
 
-  //Get URL
-  id = fileDownloader.traverseURL(id, path);
+  return fileDownloader.traversePC2(id, path).then(data => data.traverseEntry[0].value);
 
-  //Request and parse
-  var res = request('GET', id);
-  var parsedFile = JSON.parse(res.getBody());
-  var value = parsedFile.traverseEntry[0].value;
+}
 
-  //Returned matched value
-  if (value) {
-    return value;
+//Validate value and push the result to an array
+//Effects : modifies the given array
+function pushData(value, key, result) {
+  if (value.length !== 0) {
+    result.push([key, value]);
   }
-  else {
-    return null;
-  }
+  return result;
 }
 
 //Build a sub tree array for a biopax element
@@ -72,47 +65,51 @@ function buildBioPaxTree(id) {
   //var type = biopaxElement['@type']
   //if (type) result.push(['Type', type]);
 
-  //Get data source
-  var dataSource = getData(id, 'Entity/dataSource');
-  if (dataSource.length !== 0) result.push(['Data Source', dataSource]);
+  //Create a array of all promises to resolve
+  var promiseArray = [
+    getData(id, 'Entity/dataSource'),
+    getData(id, 'SimplePhysicalEntity/entityReference/displayName'),
+    getData(id, 'Entity/comment'),
+    getData(id, 'Named/name'),
+    getData(id, 'Named/standardName'),
+    getData(id, 'Entity/cellularLocation'),
+    getData(id, 'SimplePhysicalEntity/entityReference/xref/db'),
+    getData(id, 'SimplePhysicalEntity/entityReference/xref/id'),
+    getData(id, 'Entity/xref/db'),
+    getData(id, 'Entity/xref/id')
+  ];
 
-  //Get display name
-  var dName = getData(id, 'SimplePhysicalEntity/entityReference/displayName')
-  if (dName.length !== 0) result.push(['Display Name', dName]);
+  //Wait for all promises to resolve
+  return Promise.all(promiseArray).then(data => {
+    //Push basic results to result 
+    result = pushData(data[0], 'Data Source', result);
+    result = pushData(data[1], 'Display Name', result);
+    result = pushData(data[2], 'Comment', result);
+    result = pushData(data[3], 'Names', result);
+    result = pushData(data[4], 'Standard Name', result);
 
-  //Get Comments
-  var comment = getData(id, 'Entity/comment');
-  if (comment.length !== 0) result.push(['Comment', comment]);
+    //Process Cellular Location
+    var cellLocation = data[5];
+    if (cellLocation.length !== 0 && cellLocation[0].indexOf('http') !== -1) {
+      cellLocation = getData(cellLocation[0], 'ControlledVocabulary/term');
+    }
+    if (cellLocation) { result.push(['Cellular Location', cellLocation]); }
 
-  //Get Names
-  var name = getData(id, 'Named/name');
-  if (name.length !== 0) result.push(['Names', name]);
+    //Merge Database ID's
+    var erefDatabases = data[6];
+    var erefDatabaseIds = data[7];
+    var xrefDatabases = data[8];
+    var xrefDatabaseIds = data[9];
+    if (erefDatabases.length !== 0 || xrefDatabases !== 0) {
+      result.push(['Databases', erefDatabases.concat(xrefDatabases)]);
+      result.push(['Database IDs', erefDatabaseIds.concat(xrefDatabaseIds)]);
+    }
 
-  //Get Standard Name
-  var sName = getData(id, 'Named/standardName');
-  if (sName.length !== 0) result.push(['Standard Name', sName]);
+    //Return subtree
+    return result;
+  })
 
-  //Get Cellular Location
-  var cellLocation = getData(id, 'Entity/cellularLocation');
-  if (cellLocation.length !== 0 && cellLocation[0].indexOf('http') !== -1) {
-    cellLocation = getData(cellLocation[0], 'ControlledVocabulary/term');
-  }
-  if (cellLocation) result.push(['Cellular Location', cellLocation]);
-
-  //Get Entity Reference Databases
-  var erefDatabases = getData(id, 'SimplePhysicalEntity/entityReference/xref/db');
-  var erefDatabaseIds = getData(id, 'SimplePhysicalEntity/entityReference/xref/id');
-  var xrefDatabases = getData(id, 'Entity/xref/db');
-  var xrefDatabaseIds = getData(id, 'Entity/xref/id');
-  if (erefDatabases.length !== 0 || xrefDatabases !== 0) {
-    result.push(['Databases',  erefDatabases.concat(xrefDatabases)]);
-    result.push(['Database IDs', erefDatabaseIds.concat(xrefDatabaseIds)]);
-  }
-
-  //Return subtree
-  return result;
 }
-
 
 //Remove all characters after nth instance of underscore
 //Requires the string to contain at least 1 underscore
@@ -136,7 +133,7 @@ function getElementFromBioPax(id, biopaxFile) {
   if (id.indexOf('http') <= -1) {
     id = 'http://pathwaycommons.org/pc2/' + id;
   }
-  
+
 
   var str = "$..[?(@.pathid==\"" + id + "\")]";
   //Get element matching the id
@@ -175,7 +172,7 @@ function getBioPaxSubtree(nodeId, biopax) {
   var extSearch = getElementFromBioPax(fixedNodeId, biopax);
   if (extSearch) return buildBioPaxTree(fixedNodeId);
 
-  return null;
+  return Promise.resolve(1);
 }
 
 //Replace all instances of a substring with a given string
@@ -195,25 +192,22 @@ function processBioPax(data, nodes) {
   //Get Graph Elements
   var graph = data['@graph'];
 
-  //Loop through all nodes
-  for (var i = 0; i < nodes.length; i++) {
+  var result = [];
+  var promises = [];
 
+  return Promise.map(nodes, function (el) {
     //Get element values
-    var id = nodes[i].data.id;
+    var id = el.data.id;
 
-    //Get metadata for current node
-    var metadata = getBioPaxSubtree(id, graph);
-
-    //Parse metadata
-    try {
-      nodes[i].data.parsedMetadata = metadata;
-    }
-    catch (e) { console.log(e); throw e; }
-
-  }
-
-  //Return nodes
-  return nodes;
+    promises.push(getBioPaxSubtree(id, graph).then(value => {
+      el.data.parsedMetadata = value;
+      result.push(el);
+    }));
+  }, { concurrency: 8 }).then(function (data) {
+    return Promise.map(promises, function(el) {}, { concurrency: 8 }).then(
+      value => result
+    )
+  });
 }
 
 
