@@ -3,10 +3,16 @@ const metadataMapperJson = require('./metadataMapperJson');
 const metadataMapperXML = require('./metadataMapperXML');
 const metadataMapperPC2 = require('./metadataMapperPC2');
 
+//Debug code (Ignore)
+const fs = require('fs');
+//http://identifiers.org/reactome/R-HSA-6804754
+//http://identifiers.org/kegg.pathway/hsa00260
+let x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-6804754').then(data => fs.writeFileSync('testFile', JSON.stringify(data)));//Debug code (Ignore)
+
 //Get pathway name, description, and datasource
 //Requires a valid pathway uri
 function getPathwayLevelMetadata(uri) {
-  var title, dataSource, comments, organism;
+  let title, dataSource, comments, organism;
 
   //Get title
   return pcServices.traversePC2(uri, 'Named/displayName').then(function (data) 
@@ -41,13 +47,13 @@ function getPathwayLevelMetadata(uri) {
 //Get metadata enhanced cytoscape JSON
 //Requires a valid pathway uri
 function getMetadataJson(uri, parseType) {
-  var sbgn, biopax;
+  let sbgn, biopax;
 
   //Get SBGN XML
   return pcServices.getPC2(uri, 'sbgn').then(function (data) {
     sbgn = data;
 
-    var downloadType = (parseType === 'pc2' ? 'jsonld' : parseType);
+    let downloadType = (parseType === 'pc2' ? 'jsonld' : parseType);
 
     //Get BioPax XML
     return pcServices.getPC2(uri, downloadType).then(function (data) {
@@ -64,7 +70,7 @@ function getMetadataJson(uri, parseType) {
 //Return enhanced cytoscape json
 //Requires a valid pathway uri 
 function getCytoscapeJson(uri, parseType = 'jsonld') {
-  var pathwayMetadata;
+  let pathwayMetadata;
 
   //Start Generation
   return getPathwayLevelMetadata(uri).then(function (data) {

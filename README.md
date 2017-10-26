@@ -13,7 +13,7 @@ const cytoscapeJson = require(cytoscapeJson)
 
 #### Requesting Mapped Metadata
 ```js
-var mappedData = cytoscapeJson.getCytoscapeJson(uri, parserType) 
+let mappedData = cytoscapeJson.getCytoscapeJson(uri, parserType) 
 ```
 - parserType indicates the method for parsing data and the source for reteriving the data. 
     - (Default) "jsonld" - Loads information from JSON-LD and uses tree-traversal on node objects 
@@ -23,6 +23,6 @@ var mappedData = cytoscapeJson.getCytoscapeJson(uri, parserType)
 
 ### Requesting Pathway Metadata
 ```js
-var pathwayMetadata = cytoscapeJson.getPathwayLevelMetadata(uri)
+let pathwayMetadata = cytoscapeJson.getPathwayLevelMetadata(uri)
 ```
 
