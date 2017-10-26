@@ -3,12 +3,6 @@ const metadataMapperJson = require('./metadataMapperJson');
 const metadataMapperXML = require('./metadataMapperXML');
 const metadataMapperPC2 = require('./metadataMapperPC2');
 
-//Debug code (Ignore)
-const fs = require('fs');
-//http://identifiers.org/reactome/R-HSA-6804754
-//http://identifiers.org/kegg.pathway/hsa00260
-let x = getCytoscapeJson('http://identifiers.org/reactome/R-HSA-6804754').then(data => fs.writeFileSync('testFile', JSON.stringify(data)));//Debug code (Ignore)
-
 //Get pathway name, description, and datasource
 //Requires a valid pathway uri
 function getPathwayLevelMetadata(uri) {
