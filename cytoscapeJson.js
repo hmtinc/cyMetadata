@@ -50,9 +50,6 @@ function getCytoscapeJson(uri, parseType = 'jsonld') {
       data.parseType = parseType;
       return data;
     })
-  }).catch(function (e) {
-    console.log(e);
-    return { error: e };
   })
 }
 
