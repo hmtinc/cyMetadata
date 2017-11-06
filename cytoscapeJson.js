@@ -33,7 +33,7 @@ function getMetadataJson(uri, parseType) {
     if (parseType === 'jsonld') { return metadataMapperJson(biopax, sbgn); }
     else if (parseType === 'pc2') { return metadataMapperPC2(biopax, sbgn); }
     else {return null;}
-  })
+  });
 }
 
 //Return enhanced cytoscape json
