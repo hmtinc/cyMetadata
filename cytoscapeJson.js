@@ -1,6 +1,5 @@
 const pcServices = require('./pcServices');
 const metadataMapperJson = require('./metadataMapperJson');
-const metadataMapperXML = require('./metadataMapperXML');
 const metadataMapperPC2 = require('./metadataMapperPC2');
 
 //Get pathway name, description, and datasource
@@ -32,8 +31,8 @@ function getMetadataJson(uri, parseType) {
   ]).then(files => {
     //Map metadata
     if (parseType === 'jsonld') { return metadataMapperJson(biopax, sbgn); }
-    else if (parseType === 'biopax') { return metadataMapperXML(biopax, sbgn); }
     else if (parseType === 'pc2') { return metadataMapperPC2(biopax, sbgn); }
+    else {return null;}
   })
 }
 
