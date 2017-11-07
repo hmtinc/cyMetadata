@@ -53,7 +53,7 @@ function buildBioPaxSubtree(biopaxElement, biopaxFile, visited, nodeType = 'defa
     let cellLocation = biopaxElement['cellularLocation'];
     if (cellLocation && cellLocation.indexOf('http') !== -1) {
       cellLocation = getElementFromBioPax(biopaxFile, cellLocation);
-      cellLocation = cellLocation[0]['term'];
+      cellLocation = cellLocation['term'];
     }
     if (cellLocation) { result.push(['Cellular Location', cellLocation]); }
   }
